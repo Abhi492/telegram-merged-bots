@@ -36,30 +36,40 @@ if os.getenv("PYTHONANYWHERE_SITE") or (WEBHOOK_URL and "pythonanywhere" in WEBH
     apihelper.proxy = {'https': 'http://proxy.server:3128'}
     logger.info("Configured PythonAnywhere proxy.")
 
-# Initialize bots
-bot_char = telebot.TeleBot(CHAR_TOKEN) if CHAR_TOKEN else None
-bot_video = telebot.TeleBot(VIDEO_TOKEN) if VIDEO_TOKEN else None
+# Initialize bots (threaded=False is required under WSGI/uWSGI servers like PythonAnywhere to prevent threads from being terminated early)
+bot_char = telebot.TeleBot(CHAR_TOKEN, threaded=False) if CHAR_TOKEN else None
+bot_video = telebot.TeleBot(VIDEO_TOKEN, threaded=False) if VIDEO_TOKEN else None
 
 app = Flask(__name__)
 
 # Webhook route for Character Counter Bot
 @app.route('/webhook_char', methods=['POST'])
 def webhook_char():
-    if bot_char and request.headers.get('content-type') == 'application/json':
-        json_string = request.get_data().decode('utf-8')
-        update = telebot.types.Update.de_json(json_string)
-        bot_char.process_new_updates([update])
-        return 'OK', 200
+    try:
+        if bot_char and request.headers.get('content-type') == 'application/json':
+            json_string = request.get_data().decode('utf-8')
+            update = telebot.types.Update.de_json(json_string)
+            bot_char.process_new_updates([update])
+            return 'OK', 200
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return 'Internal Server Error', 500
     return 'Forbidden', 403
 
 # Webhook route for Video Downloader Bot
 @app.route('/webhook_video', methods=['POST'])
 def webhook_video():
-    if bot_video and request.headers.get('content-type') == 'application/json':
-        json_string = request.get_data().decode('utf-8')
-        update = telebot.types.Update.de_json(json_string)
-        bot_video.process_new_updates([update])
-        return 'OK', 200
+    try:
+        if bot_video and request.headers.get('content-type') == 'application/json':
+            json_string = request.get_data().decode('utf-8')
+            update = telebot.types.Update.de_json(json_string)
+            bot_video.process_new_updates([update])
+            return 'OK', 200
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return 'Internal Server Error', 500
     return 'Forbidden', 403
 
 # Set up Webhooks on startup if WEBHOOK_URL is available
