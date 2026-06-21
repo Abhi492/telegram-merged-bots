@@ -1,0 +1,8 @@
+# Token for the Character Counter Bot
+CHAR_BOT_TOKEN=your_char_counter_bot_token_here
+
+# Token for the Video Downloader Bot
+VIDEO_BOT_TOKEN=your_video_downloader_bot_token_here
+
+# Public webhook URL (e.g., https://yourusername.pythonanywhere.com)
+WEBHOOK_URL=
