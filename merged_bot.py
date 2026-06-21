@@ -30,6 +30,12 @@ logger = logging.getLogger(__name__)
 downloads_dir = os.path.join(script_dir, "downloads")
 os.makedirs(downloads_dir, exist_ok=True)
 
+# Configure PythonAnywhere proxy if running on PythonAnywhere free tier
+if os.getenv("PYTHONANYWHERE_SITE"):
+    from telebot import apihelper
+    apihelper.proxy = {'https': 'http://proxy.server:3128'}
+    logger.info("Configured PythonAnywhere proxy.")
+
 # Initialize bots
 bot_char = telebot.TeleBot(CHAR_TOKEN) if CHAR_TOKEN else None
 bot_video = telebot.TeleBot(VIDEO_TOKEN) if VIDEO_TOKEN else None
